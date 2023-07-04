@@ -1,0 +1,30 @@
+version: 2
+
+stages:
+  - name: Build
+    steps:
+      - name: Install Dependencies
+        image: node:14
+        commands:
+          - npm install
+
+  - name: Test
+    steps:
+      - name: Run Unit Tests
+        image: node:14
+        commands:
+          - npm test
+
+  - name: Package
+    steps:
+      - name: Package Lambda Function
+        image: amazon/aws-cli:2.x
+        commands:
+          - aws cloudformation package --template-file template.yml --s3-bucket my-bucket --output-template-file packaged-template.yml
+
+  - name: Deploy
+    steps:
+      - name: Deploy Lambda Function
+        image: amazon/aws-cli:2.x
+        commands:
+          - aws cloudformation deploy --template-file packaged-template.yml --stack-name my-stack --capabilities CAPABILITY_IAM
